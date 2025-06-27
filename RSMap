@@ -1,0 +1,90 @@
+import time
+
+MAP_WIDTH = 10
+MAP_HEIGHT = 10 //TK 1001 İF TK 4009 - 700 1.D
+
+MAP = [[0 for _ in range(MAP_WIDTH)] for _ in range(MAP_HEIGHT)]
+
+MAP[2][2] = 2
+MAP[2][3] = 2
+MAP[3][2] = 2
+MAP[5][5] = 2
+MAP[5][6] = 2
+MAP[6][5] = 2
+
+robot_x = 0
+robot_y = 0
+
+DIRECTIONS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+current_direction_index = 0
+
+def is_valid_move(x, y):
+    return 0 <= x < MAP_HEIGHT and 0 <= y < MAP_WIDTH and MAP[x][y] != 2
+
+def print_map():
+    print("-" * (MAP_WIDTH * 2 + 1))
+    for r in range(MAP_HEIGHT):
+        row_str = "|"
+        for c in range(MAP_WIDTH):
+            if r == robot_x and c == robot_y:
+                row_str += "R "
+            elif MAP[r][c] == 0:
+                row_str += ". "
+            elif MAP[r][c] == 1:
+                row_str += "# "
+            elif MAP[r][c] == 2:
+                row_str += "X "
+            else:
+                row_str += "? "
+        row_str += "|"
+        print(row_str)
+    print("-" * (MAP_WIDTH * 2 + 1))
+    time.sleep(0.5)
+
+def robot_sweep():
+    global robot_x, robot_y, current_direction_index
+
+    MAP[robot_x][robot_y] = 1
+    print("Başlangıç Haritası:")
+    print_map()
+
+    steps = 0
+    max_steps = MAP_WIDTH * MAP_HEIGHT * 2
+
+    while steps < max_steps:
+        if MAP[robot_x][robot_y] == 0:
+            MAP[robot_x][robot_y] = 1
+
+        print(f"\nAdım: {steps + 1}, Konum: ({robot_x}, {robot_y}), Yön: {current_direction_index}")
+        print_map()
+
+        dx, dy = DIRECTIONS[current_direction_index]
+        next_x, next_y = robot_x + dx, robot_y + dy
+
+        if is_valid_move(next_x, next_y):
+            robot_x, robot_y = next_x, next_y
+            if MAP[robot_x][robot_y] == 0:
+                MAP[robot_x][robot_y] = 1
+        else:
+            print(f"Engel ile karşılaşıldı veya sınır dışına çıkıldı. Yön değiştiriliyor.")
+            current_direction_index = (current_direction_index + 1) % 4
+
+        all_cleaned = True
+        for r in range(MAP_HEIGHT):
+            for c in range(MAP_WIDTH):
+                if MAP[r][c] == 0:
+                    all_cleaned = False
+                    break
+            if not all_cleaned:
+                break
+
+        if all_cleaned:
+            print("\nTüm alan temizlendi!")
+            break
+
+        steps += 1
+
+    if steps == max_steps:
+        print("\nMaksimum adım sayısına ulaşıldı, temizleme tamamlanamadı.")
+
+robot_sweep()
